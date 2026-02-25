@@ -246,14 +246,12 @@
 <body>
 
 <header>
-    <span class="title">🐢</span>
+    <span class="title">🐢***float joystick coming soon!***</float></span>
 
     <div id="ctrl-toggle" role="group" aria-label="Control mode">
-        <button class="ctrl-btn active" data-mode="keyboard"   type="button">⌨️ Keys</button>
-        <button class="ctrl-btn"        data-mode="fixed-joy"  type="button">🕹️ Fixed</button>
-        <button class="ctrl-btn"        data-mode="float-joy"  type="button">🕹️ Float</button>
-        <button class="ctrl-btn"        data-mode="dpad4"      type="button">✛ D-pad</button>
-
+        <button class="ctrl-btn active" data-mode="keyboard"  type="button">⌨️ Keys</button>
+        <button class="ctrl-btn"        data-mode="fixed-joy" type="button">🕹️ Fixed</button>
+        <button class="ctrl-btn"        data-mode="dpad4"     type="button">✛ D-pad</button>
     </div>
 
     <button id="help-btn" type="button" aria-expanded="false" aria-controls="instructions">? Help</button>
@@ -287,7 +285,7 @@
     "/>
 </svg>
 
-<!-- Joystick (used by both fixed and float modes) -->
+<!-- Joystick -->
 <div id="joystick-wrap" aria-label="Joystick" role="group">
     <div id="joystick-base">
         <div id="joystick-stick"></div>
@@ -336,7 +334,6 @@
     const dpadSideToggle = document.getElementById('dpad-side-toggle');
     const ctrlBtns       = document.querySelectorAll('.ctrl-btn');
 
-
     // ── Help toggle ───────────────────────────────────────────────
     helpBtn.addEventListener('click', () => {
         const hidden = instructions.hidden;
@@ -375,7 +372,6 @@
             joySideToggle.style.display = 'block';
             updateJoySideTogglePos();
         }
-        // float-joy: shown dynamically on touch
         if (mode === 'dpad4') {
             dpadEl.style.display         = 'block';
             dpadSideToggle.style.display = 'block';
@@ -411,7 +407,7 @@
 
     function applyDpadSide(side) {
         dpadSide = side;
-        dpadEl.classList.remove('left','right');
+        dpadEl.classList.remove('left', 'right');
         dpadEl.classList.add(side);
     }
     function updateDpadSideTogglePos() {
@@ -446,10 +442,8 @@
     function resetJoy() {
         joy.dx = 0; joy.dy = 0; joy.active = false; joy.pointerId = null;
         joystickStick.style.transform = 'translate(-50%, -50%)';
-        if (controlMode === 'float-joy') joystickWrap.style.display = 'none';
     }
 
-    // Fixed joy — events on base
     joystickBase.addEventListener('pointerdown', e => {
         if (controlMode !== 'fixed-joy' || joy.active) return;
         e.preventDefault();
@@ -467,34 +461,6 @@
     });
     joystickBase.addEventListener('pointerup',     e => { if (e.pointerId === joy.pointerId) resetJoy(); });
     joystickBase.addEventListener('pointercancel', e => { if (e.pointerId === joy.pointerId) resetJoy(); });
-
-    // Float joy — events on document
-    document.addEventListener('pointerdown', e => {
-        if (controlMode !== 'float-joy') return;
-        if (e.target.closest('header, footer, #turtle, #instructions')) return;
-        if (joy.active) return;
-        e.preventDefault();
-        joy.active = true; joy.pointerId = e.pointerId;
-        const bx = clamp(e.clientX, BASE_HALF, window.innerWidth  - BASE_HALF);
-        const by = clamp(e.clientY, BASE_HALF, window.innerHeight - BASE_HALF);
-        joy.originX = bx; joy.originY = by;
-        joystickWrap.style.left   = (bx - BASE_HALF) + 'px';
-        joystickWrap.style.top    = (by - BASE_HALF) + 'px';
-        joystickWrap.style.bottom = 'auto';
-        joystickWrap.style.right  = 'auto';
-        joystickWrap.style.display = 'block';
-        if (!turtleActive) activate();
-        setStickPos(0, 0);
-    }, { passive: false });
-
-    document.addEventListener('pointermove', e => {
-        if (controlMode !== 'float-joy' || !joy.active || e.pointerId !== joy.pointerId) return;
-        e.preventDefault();
-        setStickPos(e.clientX - joy.originX, e.clientY - joy.originY);
-    }, { passive: false });
-
-    document.addEventListener('pointerup',     e => { if (controlMode === 'float-joy' && e.pointerId === joy.pointerId) resetJoy(); });
-    document.addEventListener('pointercancel', e => { if (controlMode === 'float-joy' && e.pointerId === joy.pointerId) resetJoy(); });
 
     // ── D-pad buttons ─────────────────────────────────────────────
     const dpadVecs = {
@@ -667,7 +633,7 @@
                 if (keys['ArrowDown']  || keys['s'] || keys['S']) vy += 1;
                 if (keys['ArrowUp']    || keys['w'] || keys['W']) vy -= 1;
             }
-            if (controlMode === 'fixed-joy' || controlMode === 'float-joy') {
+            if (controlMode === 'fixed-joy') {
                 vx = joy.dx; vy = joy.dy;
             }
             if (controlMode === 'dpad4') {
@@ -706,7 +672,7 @@
         }
         const landscape = b.w > b.h;
         if (!joyUserPicked  && controlMode === 'fixed-joy') { joySide  = landscape ? 'right' : 'left'; positionFixedJoy(); updateJoySideTogglePos(); }
-        if (!dpadUserPicked && controlMode === 'dpad4') { applyDpadSide(landscape ? 'right' : 'left'); updateDpadSideTogglePos(); }
+        if (!dpadUserPicked && controlMode === 'dpad4')     { applyDpadSide(landscape ? 'right' : 'left'); updateDpadSideTogglePos(); }
     }
 
     window.addEventListener('resize', onResize);
@@ -716,7 +682,6 @@
     // ── Init ──────────────────────────────────────────────────────
     const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 
-    // On touch devices: hide the Keys option and default to dpad4
     if (isTouchDevice) {
         document.querySelector('[data-mode="keyboard"]').classList.add('touch-hidden');
         window.addEventListener('touchstart', () => {
